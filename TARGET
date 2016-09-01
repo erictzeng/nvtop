@@ -1,0 +1,20 @@
+#  Name                 gpu%                       memory
+0  GeForce GTX TITAN X  [|||||              ] 25%  [|||||              ]  
+1  GeForce GTX TITAN X  [|||||||||||||||||| ] 98%
+2  GeForce GTX TITAN X  [|||||              ]
+3  GeForce GTX TITAN X  [|||||              ]
+4  Tesla K40c           [|||||              ]
+5  GeForce GTX TITAN X  [|||||              ]
+6  GeForce GTX 980      [|||||              ]
+7  Tesla K40c           [|||||              ]
+
+
+#   Name      gpu%                       memory
+0   TITAN X   [|||||              ] 25%  [|||||              ]  103 / 12285 MiB
+1   TITAN X   [|||||||||||||||||| ] 98%
+2   TITAN X   [|||||              ]
+3   TITAN X   [|||||              ]
+4   K40c      [|||||              ]
+5   TITAN X   [|||||              ]
+6   980       [|||||              ]
+7   K40c      [|||||              ]

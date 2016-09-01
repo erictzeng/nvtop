@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+from __future__ import division
+from __future__ import print_function
+
+import time
+
+import click
+import psutil
+import pynvml
+from blessings import Terminal
+from click_default_group import DefaultGroup
+from contextlib2 import ExitStack
+from termcolor import colored, cprint
+
+from bar import bar
+
+SHORT_NAMES = {
+    'GeForce GTX TITAN X': 'Titan X',
+    'Tesla K40c': 'K40',
+    'GeForce GTX 980': '980',
+}
+
+
+
+
+def size_str(n):
+    return '{}MiB'.format(int(n / (1024 * 1024)))
+
+@click.group(cls=DefaultGroup, default='info', default_if_no_args=True)
+@click.pass_context
+def cli(ctx):
+    pass
+
+@cli.command(short_help='Show GPU info.')
+@click.option('--loop/--once', '-l/-o', default=False)
+def info(loop):
+    """Display GPU utilization information."""
+    term = Terminal()
+    pynvml.nvmlInit()
+    with ExitStack() as stack:
+        if loop:
+            stack.enter_context(term.fullscreen())
+        while True:
+            if loop:
+                print(term.move(1, 1))
+            cprint('GPU summary:', attrs=['bold'])
+            for i in range(pynvml.nvmlDeviceGetCount()):
+                line = []
+                line.append('  {: <3} '.format(i))
+                handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+                name = pynvml.nvmlDeviceGetName(handle)
+                if name in SHORT_NAMES:
+                    name = SHORT_NAMES[name]
+                line.append('{: <10} '.format(name))
+                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+                line.append(bar(util.gpu / 100, width=18))
+                line.append('{: >5}%  '.format(util.gpu))
+                mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                line.append(bar(mem.used / mem.total, width=18))
+                line.append(' {: >8} / {: >8}'
+                            .format(size_str(mem.used), size_str(mem.total)))
+                print(''.join(line))
+            print()
+            cprint('Running processes:', attrs=['bold'])
+            collect_processes()
+            if not loop:
+                break
+            time.sleep(0.5)
+            print(term.clear())
+
+def collect_processes():
+    for i in range(pynvml.nvmlDeviceGetCount()):
+        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+        for process in pynvml.nvmlDeviceGetComputeRunningProcesses(handle):
+            process = psutil.Process(process.pid)
+            print(' ', i, end='  ')
+            print(' '.join(arg for arg in process.cmdline() if arg))
+
+
+if __name__ == '__main__':
+    cli()
