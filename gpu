@@ -2,6 +2,7 @@
 from __future__ import division
 from __future__ import print_function
 
+import getpass
 import time
 
 import click
@@ -69,11 +70,15 @@ def info(loop):
             print(term.clear())
 
 def collect_processes():
+    user = getpass.getuser()
     for i in range(pynvml.nvmlDeviceGetCount()):
         handle = pynvml.nvmlDeviceGetHandleByIndex(i)
         for process in pynvml.nvmlDeviceGetComputeRunningProcesses(handle):
             process = psutil.Process(process.pid)
+            process_user = process.username()
             print(' ', i, end='  ')
+            if process_user != user:
+                print('({})'.format(process_user), end=' ')
             print(' '.join(arg for arg in process.cmdline() if arg))
 
 
